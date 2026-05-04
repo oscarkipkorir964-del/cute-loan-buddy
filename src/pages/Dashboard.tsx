@@ -77,6 +77,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     checkUser();
     fetchData();
 
@@ -140,6 +141,12 @@ const Dashboard = () => {
       navigate(location.pathname, { replace: true });
     }
   }, [location.state]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      window.scrollTo(0, 0);
+    }
+  }, [isLoading]);
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
