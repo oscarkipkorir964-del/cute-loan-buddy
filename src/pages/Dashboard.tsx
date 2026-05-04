@@ -278,7 +278,10 @@ const Dashboard = () => {
   const nextPaymentDate = new Date();
   nextPaymentDate.setDate(nextPaymentDate.getDate() + 15);
 
-  const userName = user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'User';
+  const fullNameFromApp = loanApplications?.[0]?.full_name as string | undefined;
+  const userName = (user?.user_metadata?.full_name || fullNameFromApp)?.split(' ')[0]
+    || user?.email?.split('@')[0]
+    || 'User';
 
   if (isLoading) {
     return (
