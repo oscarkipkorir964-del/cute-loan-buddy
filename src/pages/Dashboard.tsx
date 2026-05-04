@@ -77,6 +77,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     checkUser();
     fetchData();
 
