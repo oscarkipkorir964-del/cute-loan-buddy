@@ -8,6 +8,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 
 const MIN_DEPOSIT_AMOUNT = 100;
+const MIN_FAILURE_DISPLAY_MS = 70000;
+const PAYMENT_TIMEOUT_MS = 180000;
+
+const isFailureMessage = (message?: string | null) =>
+  message?.toLowerCase().startsWith('payment failed') ?? false;
+
+const canShowFailure = (message?: string | null, createdAt?: string | null) => {
+  if (!isFailureMessage(message)) return false;
+  const startedAt = createdAt ? new Date(createdAt).getTime() : Date.now();
+  return Date.now() - startedAt >= MIN_FAILURE_DISPLAY_MS;
+};
+
+const cleanFailureMessage = (message?: string | null) => {
+  const cleaned = message?.replace(/^Payment failed:\s*/i, '').trim();
+  if (!cleaned || cleaned.toLowerCase() === 'unknown error') {
+    return "M-Pesa did not complete this payment. Please try again.";
+  }
+  return cleaned;
+};
 
 // Calculate required savings based on loan amount
 // Formula: 100 for KES 2000 loan, scaling up to 1500 for KES 30000 loan
@@ -26,6 +45,60 @@ const calculateRequiredSavings = (loanAmount: number): number => {
 
 type PaymentStatus = 'idle' | 'processing' | 'waiting' | 'success' | 'failed';
 
+const PaymentStatusSteps = ({ status }: { status: PaymentStatus }) => {
+  const currentStep = status === 'processing' ? 0 : status === 'waiting' ? 1 : 2;
+  const steps = [
+    {
+      title: 'STK sent',
+      description: status === 'processing' ? 'Sending prompt to your phone' : 'Prompt sent to your phone',
+    },
+    {
+      title: 'Waiting for PIN',
+      description: 'Enter your M-Pesa PIN when the prompt appears',
+    },
+    {
+      title: 'Received result',
+      description: status === 'success' ? 'Payment confirmed' : status === 'failed' ? 'Payment was not completed' : 'Waiting for M-Pesa confirmation',
+    },
+  ];
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+      {steps.map((step, index) => {
+        const isActive = index === currentStep && (status === 'processing' || status === 'waiting');
+        const isComplete = index < currentStep || status === 'success';
+        const isFailed = status === 'failed' && index === 2;
+
+        return (
+          <div key={step.title} className="flex items-start gap-3">
+            <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
+              isFailed
+                ? 'border-destructive bg-destructive/10 text-destructive'
+                : isActive || isComplete
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-muted text-muted-foreground'
+            }`}>
+              {isFailed ? (
+                <XCircle className="h-4 w-4" />
+              ) : isActive ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isComplete ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <Clock className="h-4 w-4" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground">{step.title}</p>
+              <p className="text-xs text-muted-foreground">{step.description}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const Payment = () => {
   const [loanAmount, setLoanAmount] = useState<number | null>(null);
   const [savingsBalance, setSavingsBalance] = useState<number | null>(null);
@@ -34,6 +107,7 @@ const Payment = () => {
   const [depositAmount, setDepositAmount] = useState("");
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle');
   const [pendingReference, setPendingReference] = useState<string | null>(null);
+  const [failureMessage, setFailureMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -70,15 +144,18 @@ const Payment = () => {
       setDepositAmount("");
     };
 
-    const handleFailed = () => {
+    const handleFailed = (message?: string | null, showToast = true) => {
       if (settled) return;
       settled = true;
+      setFailureMessage(cleanFailureMessage(message));
       setPaymentStatus('failed');
-      toast({
-        title: "Payment Failed",
-        description: "The payment was not completed. Please try again.",
-        variant: "destructive",
-      });
+      if (showToast) {
+        toast({
+          title: "Payment Failed",
+          description: cleanFailureMessage(message),
+          variant: "destructive",
+        });
+      }
       setPendingReference(null);
     };
 
@@ -88,16 +165,16 @@ const Payment = () => {
       try {
         const { data } = await supabase
           .from('savings_deposits')
-          .select('verified, amount, mpesa_message')
+          .select('verified, amount, mpesa_message, created_at')
           .eq('transaction_code', pendingReference)
           .maybeSingle();
 
         if (data?.verified === true) {
           console.log('Poll detected verified deposit:', data);
           await handleVerified(data.amount);
-        } else if (data?.verified === false && data.mpesa_message?.startsWith('Payment failed')) {
+        } else if (data?.verified === false && canShowFailure(data.mpesa_message, data.created_at)) {
           console.log('Poll detected failed deposit:', data);
-          handleFailed();
+          handleFailed(data.mpesa_message);
         }
       } catch (err) {
         console.error('Poll error:', err);
@@ -117,14 +194,14 @@ const Payment = () => {
         async (payload) => {
           console.log('Deposit change received:', payload);
           if (payload.eventType === 'INSERT') return; // ignore initial insert (verified=false by default)
-          const newRecord = payload.new as { verified: boolean | null; amount: number; transaction_code: string; mpesa_message?: string };
+          const newRecord = payload.new as { verified: boolean | null; amount: number; transaction_code: string; mpesa_message?: string; created_at?: string };
           
           if (newRecord.transaction_code !== pendingReference) return;
           
           if (newRecord.verified === true) {
             await handleVerified(newRecord.amount);
-          } else if (newRecord.verified === false && newRecord.mpesa_message?.startsWith('Payment failed')) {
-            handleFailed();
+          } else if (newRecord.verified === false && canShowFailure(newRecord.mpesa_message, newRecord.created_at)) {
+            handleFailed(newRecord.mpesa_message);
           }
         }
       )
@@ -135,14 +212,14 @@ const Payment = () => {
     // Timeout after 2 minutes
     const timeout = setTimeout(() => {
       if (!settled) {
-        handleFailed();
+        handleFailed("Payment timeout", false);
         toast({
           title: "Payment Timeout",
           description: "We didn't receive confirmation. If you completed the payment, please contact support.",
           variant: "destructive",
         });
       }
-    }, 120000);
+    }, PAYMENT_TIMEOUT_MS);
 
     return () => {
       settled = true;
@@ -150,7 +227,7 @@ const Payment = () => {
       supabase.removeChannel(channel);
       clearTimeout(timeout);
     };
-  }, [pendingReference, paymentStatus, toast]);
+  }, [pendingReference, toast]);
 
   const fetchPhoneNumber = async () => {
     try {
@@ -204,6 +281,7 @@ const Payment = () => {
 
   const handlePayNow = async () => {
     const amount = parseInt(depositAmount);
+    setFailureMessage(null);
     
     if (!phoneNumber.trim()) {
       toast({
@@ -356,6 +434,7 @@ const Payment = () => {
   const resetPayment = () => {
     setPaymentStatus('idle');
     setPendingReference(null);
+    setFailureMessage(null);
   };
 
   const requiredSavings = loanAmount ? calculateRequiredSavings(loanAmount) : MIN_DEPOSIT_AMOUNT;
@@ -429,6 +508,10 @@ const Payment = () => {
             )}
 
             {/* Payment Status Display */}
+            {['processing', 'waiting', 'success', 'failed'].includes(paymentStatus) && (
+              <PaymentStatusSteps status={paymentStatus} />
+            )}
+
             {paymentStatus === 'waiting' && (
               <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-xl border-2 border-amber-200 dark:border-amber-800 text-center space-y-4">
                 <div className="w-16 h-16 bg-amber-100 dark:bg-amber-800/40 rounded-full flex items-center justify-center mx-auto">
@@ -477,7 +560,7 @@ const Payment = () => {
                 <div>
                   <p className="font-semibold text-red-700 dark:text-red-400">Payment Failed</p>
                   <p className="text-sm text-red-600 dark:text-red-500 mt-1">
-                    The payment was not completed. Please try again.
+                    {failureMessage || "The payment was not completed. Please try again."}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={resetPayment}>
