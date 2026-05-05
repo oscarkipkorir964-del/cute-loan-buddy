@@ -506,6 +506,10 @@ const Payment = () => {
             )}
 
             {/* Payment Status Display */}
+            {['processing', 'waiting', 'success', 'failed'].includes(paymentStatus) && (
+              <PaymentStatusSteps status={paymentStatus} />
+            )}
+
             {paymentStatus === 'waiting' && (
               <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-xl border-2 border-amber-200 dark:border-amber-800 text-center space-y-4">
                 <div className="w-16 h-16 bg-amber-100 dark:bg-amber-800/40 rounded-full flex items-center justify-center mx-auto">
@@ -554,7 +558,7 @@ const Payment = () => {
                 <div>
                   <p className="font-semibold text-red-700 dark:text-red-400">Payment Failed</p>
                   <p className="text-sm text-red-600 dark:text-red-500 mt-1">
-                    The payment was not completed. Please try again.
+                    {failureMessage || "The payment was not completed. Please try again."}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={resetPayment}>
