@@ -227,7 +227,7 @@ const Payment = () => {
       supabase.removeChannel(channel);
       clearTimeout(timeout);
     };
-  }, [pendingReference, fetchSavingsBalance, toast]);
+  }, [pendingReference, toast]);
 
   const fetchPhoneNumber = async () => {
     try {
