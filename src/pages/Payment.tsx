@@ -279,6 +279,7 @@ const Payment = () => {
 
   const handlePayNow = async () => {
     const amount = parseInt(depositAmount);
+    setFailureMessage(null);
     
     if (!phoneNumber.trim()) {
       toast({
@@ -431,6 +432,7 @@ const Payment = () => {
   const resetPayment = () => {
     setPaymentStatus('idle');
     setPendingReference(null);
+    setFailureMessage(null);
   };
 
   const requiredSavings = loanAmount ? calculateRequiredSavings(loanAmount) : MIN_DEPOSIT_AMOUNT;
