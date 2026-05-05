@@ -8,6 +8,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 
 const MIN_DEPOSIT_AMOUNT = 100;
+const MIN_FAILURE_DISPLAY_MS = 70000;
+const PAYMENT_TIMEOUT_MS = 180000;
+
+const isFailureMessage = (message?: string | null) =>
+  message?.toLowerCase().startsWith('payment failed') ?? false;
+
+const canShowFailure = (message?: string | null, createdAt?: string | null) => {
+  if (!isFailureMessage(message)) return false;
+  const startedAt = createdAt ? new Date(createdAt).getTime() : Date.now();
+  return Date.now() - startedAt >= MIN_FAILURE_DISPLAY_MS;
+};
+
+const cleanFailureMessage = (message?: string | null) => {
+  const cleaned = message?.replace(/^Payment failed:\s*/i, '').trim();
+  if (!cleaned || cleaned.toLowerCase() === 'unknown error') {
+    return "M-Pesa did not complete this payment. Please try again.";
+  }
+  return cleaned;
+};
 
 // Calculate required savings based on loan amount
 // Formula: 100 for KES 2000 loan, scaling up to 1500 for KES 30000 loan
@@ -25,6 +44,60 @@ const calculateRequiredSavings = (loanAmount: number): number => {
 };
 
 type PaymentStatus = 'idle' | 'processing' | 'waiting' | 'success' | 'failed';
+
+const PaymentStatusSteps = ({ status }: { status: PaymentStatus }) => {
+  const currentStep = status === 'processing' ? 0 : status === 'waiting' ? 1 : 2;
+  const steps = [
+    {
+      title: 'STK sent',
+      description: status === 'processing' ? 'Sending prompt to your phone' : 'Prompt sent to your phone',
+    },
+    {
+      title: 'Waiting for PIN',
+      description: 'Enter your M-Pesa PIN when the prompt appears',
+    },
+    {
+      title: 'Received result',
+      description: status === 'success' ? 'Payment confirmed' : status === 'failed' ? 'Payment was not completed' : 'Waiting for M-Pesa confirmation',
+    },
+  ];
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+      {steps.map((step, index) => {
+        const isActive = index === currentStep && (status === 'processing' || status === 'waiting');
+        const isComplete = index < currentStep || status === 'success';
+        const isFailed = status === 'failed' && index === 2;
+
+        return (
+          <div key={step.title} className="flex items-start gap-3">
+            <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
+              isFailed
+                ? 'border-destructive bg-destructive/10 text-destructive'
+                : isActive || isComplete
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border bg-muted text-muted-foreground'
+            }`}>
+              {isFailed ? (
+                <XCircle className="h-4 w-4" />
+              ) : isActive ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isComplete ? (
+                <CheckCircle className="h-4 w-4" />
+              ) : (
+                <Clock className="h-4 w-4" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground">{step.title}</p>
+              <p className="text-xs text-muted-foreground">{step.description}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 const Payment = () => {
   const [loanAmount, setLoanAmount] = useState<number | null>(null);
