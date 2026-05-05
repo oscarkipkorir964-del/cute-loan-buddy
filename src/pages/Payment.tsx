@@ -107,6 +107,7 @@ const Payment = () => {
   const [depositAmount, setDepositAmount] = useState("");
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>('idle');
   const [pendingReference, setPendingReference] = useState<string | null>(null);
+  const [failureMessage, setFailureMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -143,13 +144,14 @@ const Payment = () => {
       setDepositAmount("");
     };
 
-    const handleFailed = () => {
+    const handleFailed = (message?: string | null) => {
       if (settled) return;
       settled = true;
+      setFailureMessage(cleanFailureMessage(message));
       setPaymentStatus('failed');
       toast({
         title: "Payment Failed",
-        description: "The payment was not completed. Please try again.",
+        description: cleanFailureMessage(message),
         variant: "destructive",
       });
       setPendingReference(null);
@@ -161,16 +163,16 @@ const Payment = () => {
       try {
         const { data } = await supabase
           .from('savings_deposits')
-          .select('verified, amount, mpesa_message')
+          .select('verified, amount, mpesa_message, created_at')
           .eq('transaction_code', pendingReference)
           .maybeSingle();
 
         if (data?.verified === true) {
           console.log('Poll detected verified deposit:', data);
           await handleVerified(data.amount);
-        } else if (data?.verified === false && data.mpesa_message?.startsWith('Payment failed')) {
+        } else if (data?.verified === false && canShowFailure(data.mpesa_message, data.created_at)) {
           console.log('Poll detected failed deposit:', data);
-          handleFailed();
+          handleFailed(data.mpesa_message);
         }
       } catch (err) {
         console.error('Poll error:', err);
@@ -190,14 +192,14 @@ const Payment = () => {
         async (payload) => {
           console.log('Deposit change received:', payload);
           if (payload.eventType === 'INSERT') return; // ignore initial insert (verified=false by default)
-          const newRecord = payload.new as { verified: boolean | null; amount: number; transaction_code: string; mpesa_message?: string };
+          const newRecord = payload.new as { verified: boolean | null; amount: number; transaction_code: string; mpesa_message?: string; created_at?: string };
           
           if (newRecord.transaction_code !== pendingReference) return;
           
           if (newRecord.verified === true) {
             await handleVerified(newRecord.amount);
-          } else if (newRecord.verified === false && newRecord.mpesa_message?.startsWith('Payment failed')) {
-            handleFailed();
+          } else if (newRecord.verified === false && canShowFailure(newRecord.mpesa_message, newRecord.created_at)) {
+            handleFailed(newRecord.mpesa_message);
           }
         }
       )
@@ -208,14 +210,14 @@ const Payment = () => {
     // Timeout after 2 minutes
     const timeout = setTimeout(() => {
       if (!settled) {
-        handleFailed();
+        handleFailed("Payment timeout");
         toast({
           title: "Payment Timeout",
           description: "We didn't receive confirmation. If you completed the payment, please contact support.",
           variant: "destructive",
         });
       }
-    }, 120000);
+    }, PAYMENT_TIMEOUT_MS);
 
     return () => {
       settled = true;
