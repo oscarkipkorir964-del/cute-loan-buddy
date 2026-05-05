@@ -144,16 +144,18 @@ const Payment = () => {
       setDepositAmount("");
     };
 
-    const handleFailed = (message?: string | null) => {
+    const handleFailed = (message?: string | null, showToast = true) => {
       if (settled) return;
       settled = true;
       setFailureMessage(cleanFailureMessage(message));
       setPaymentStatus('failed');
-      toast({
-        title: "Payment Failed",
-        description: cleanFailureMessage(message),
-        variant: "destructive",
-      });
+      if (showToast) {
+        toast({
+          title: "Payment Failed",
+          description: cleanFailureMessage(message),
+          variant: "destructive",
+        });
+      }
       setPendingReference(null);
     };
 
@@ -210,7 +212,7 @@ const Payment = () => {
     // Timeout after 2 minutes
     const timeout = setTimeout(() => {
       if (!settled) {
-        handleFailed("Payment timeout");
+        handleFailed("Payment timeout", false);
         toast({
           title: "Payment Timeout",
           description: "We didn't receive confirmation. If you completed the payment, please contact support.",
@@ -225,7 +227,7 @@ const Payment = () => {
       supabase.removeChannel(channel);
       clearTimeout(timeout);
     };
-  }, [pendingReference, paymentStatus, toast]);
+  }, [pendingReference, fetchSavingsBalance, toast]);
 
   const fetchPhoneNumber = async () => {
     try {
