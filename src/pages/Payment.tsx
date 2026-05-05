@@ -116,13 +116,14 @@ const Payment = () => {
         },
         async (payload) => {
           console.log('Deposit change received:', payload);
-          const newRecord = payload.new as { verified: boolean | null; amount: number; transaction_code: string };
+          if (payload.eventType === 'INSERT') return; // ignore initial insert (verified=false by default)
+          const newRecord = payload.new as { verified: boolean | null; amount: number; transaction_code: string; mpesa_message?: string };
           
           if (newRecord.transaction_code !== pendingReference) return;
           
           if (newRecord.verified === true) {
             await handleVerified(newRecord.amount);
-          } else if (newRecord.verified === false) {
+          } else if (newRecord.verified === false && newRecord.mpesa_message?.startsWith('Payment failed')) {
             handleFailed();
           }
         }
