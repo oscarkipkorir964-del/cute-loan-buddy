@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
-import helaLogo from "@/assets/hela-loans-logo.png";
+import mwananchiLogo from "@/assets/mwananchi-loans-logo.png";
 
 const testimonials = [
   {
     name: "Kevin Kipyegon",
     location: "Nairobi",
     rating: 5,
-    text: "I got my loan in just 5 minutes! Hela Loans saved me when I needed emergency funds for my business.",
+    text: "I got my loan in just 5 minutes! Mwananchi Credit saved me when I needed emergency funds for my business.",
     amount: "KSh 8,500"
   },
   {
@@ -37,21 +37,21 @@ const testimonials = [
     name: "Faith Cherono",
     location: "Eldoret",
     rating: 5,
-    text: "Simple process, no paperwork. I recommend Hela Loans to all my friends and family.",
+    text: "Simple process, no paperwork. I recommend Mwananchi Credit to all my friends and family.",
     amount: "KSh 10,000"
   },
   {
     name: "Dennis Mutua",
     location: "Machakos",
     rating: 5,
-    text: "I've used many loan apps but Hela Loans is the best. Quick disbursement directly to M-Pesa!",
+    text: "I've used many loan apps but Mwananchi Credit is the best. Quick disbursement directly to M-Pesa!",
     amount: "KSh 14,500"
   },
   {
     name: "Mary Njeri",
     location: "Thika",
     rating: 5,
-    text: "Lifesaver! Got funds for my daughter's school fees within minutes. Thank you Hela Loans!",
+    text: "Lifesaver! Got funds for my daughter's school fees within minutes. Thank you Mwananchi Credit!",
     amount: "KSh 9,000"
   },
   {
@@ -72,7 +72,7 @@ const testimonials = [
     name: "James Mwangi",
     location: "Nyeri",
     rating: 5,
-    text: "Hela Loans has helped me grow my small business. The loan limits keep increasing!",
+    text: "Mwananchi Credit has helped me grow my small business. The loan limits keep increasing!",
     amount: "KSh 15,000"
   },
   {
@@ -93,14 +93,14 @@ const testimonials = [
     name: "Caroline Muthoni",
     location: "Kiambu",
     rating: 5,
-    text: "I was skeptical at first but Hela Loans proved me wrong. Genuine and reliable!",
+    text: "I was skeptical at first but Mwananchi Credit proved me wrong. Genuine and reliable!",
     amount: "KSh 8,000"
   },
   {
     name: "Michael Ouma",
     location: "Homa Bay",
     rating: 5,
-    text: "Emergency funds when I needed them most. Hela Loans is a blessing!",
+    text: "Emergency funds when I needed them most. Mwananchi Credit is a blessing!",
     amount: "KSh 10,500"
   },
   {
@@ -114,7 +114,7 @@ const testimonials = [
     name: "David Kimani",
     location: "Nairobi",
     rating: 5,
-    text: "Best rates in the market! I've compared with others and Hela Loans wins.",
+    text: "Best rates in the market! I've compared with others and Mwananchi Credit wins.",
     amount: "KSh 20,000"
   }
 ];
@@ -128,8 +128,8 @@ const Landing = () => {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
-          <img src={helaLogo} alt="Hela Loans" className="w-10 h-10 object-contain" />
-          <span className="font-bold text-xl text-foreground font-display">Hela Loans</span>
+          <img src={mwananchiLogo} alt="Mwananchi Credit" className="w-10 h-10 object-contain" />
+          <span className="font-bold text-xl text-foreground font-display">Mwananchi Credit</span>
         </div>
         <ThemeToggle />
       </header>
