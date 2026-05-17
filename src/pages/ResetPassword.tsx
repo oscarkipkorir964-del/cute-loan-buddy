@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import helaLogo from "@/assets/hela-loans-logo.png";
+import mwananchiLogo from "@/assets/mwananchi-credit-logo.png";
 import {
   InputOTP,
   InputOTPGroup,
@@ -141,7 +141,7 @@ const ResetPassword = () => {
     <div className="min-h-screen bg-gradient-soft flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-card">
         <CardHeader className="text-center space-y-4">
-          <img src={helaLogo} alt="Hela Loans" className="w-16 h-16 object-contain mx-auto" />
+          <img src={mwananchiLogo} alt="Mwananchi Credit" className="w-16 h-16 object-contain mx-auto" />
           <div>
             <CardTitle className="text-2xl">Reset Password</CardTitle>
             <CardDescription>
