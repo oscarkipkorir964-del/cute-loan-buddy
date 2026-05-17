@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, Edit, Save, User, Phone, Hash } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import mwananchiLogo from "@/assets/mwananchi-loans-logo.png";
+import mwananchiLogo from "@/assets/mwananchi-credit-logo.png";
 
 const Profile = () => {
   const navigate = useNavigate();

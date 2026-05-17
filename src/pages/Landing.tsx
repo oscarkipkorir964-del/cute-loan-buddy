@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
-import mwananchiLogo from "@/assets/mwananchi-loans-logo.png";
+import mwananchiLogo from "@/assets/mwananchi-credit-logo.png";
 
 const testimonials = [
   {

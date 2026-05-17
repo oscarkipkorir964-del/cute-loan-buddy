@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import mwananchiLogo from "@/assets/mwananchi-loans-logo.png";
+import mwananchiLogo from "@/assets/mwananchi-credit-logo.png";
 
 const PrivacyPolicy = () => {
   const navigate = useNavigate();

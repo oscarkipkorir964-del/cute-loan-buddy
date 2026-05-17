@@ -1,7 +1,7 @@
 import { Download, Smartphone, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
-import mwananchiLogo from "@/assets/mwananchi-loans-logo.png";
+import mwananchiLogo from "@/assets/mwananchi-credit-logo.png";
 
 const AppDownloadSection = () => {
   const { isInstallable, isInstalled, installApp } = usePWAInstall();

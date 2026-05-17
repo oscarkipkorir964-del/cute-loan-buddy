@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import mwananchiLogo from "@/assets/mwananchi-loans-logo.png";
+import mwananchiLogo from "@/assets/mwananchi-credit-logo.png";
 
 const Terms = () => {
   const navigate = useNavigate();

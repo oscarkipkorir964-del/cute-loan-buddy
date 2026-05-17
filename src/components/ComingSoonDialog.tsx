@@ -1,4 +1,4 @@
-import mwananchiLogo from "@/assets/mwananchi-loans-logo.png";
+import mwananchiLogo from "@/assets/mwananchi-credit-logo.png";
 import {
   Dialog,
   DialogContent,
