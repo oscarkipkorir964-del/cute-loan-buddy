@@ -124,7 +124,7 @@ const Landing = () => {
   const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: false }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/50 to-slate-50/30 dark:from-background dark:via-background dark:to-background">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-primary/5/50 to-slate-50/30 dark:from-background dark:via-background dark:to-background">
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ const Landing = () => {
             </div>
             <div className="w-px h-4 bg-border" />
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-500" />
+              <TrendingUp className="w-4 h-4 text-primary/50" />
               <span className="text-xs font-medium text-muted-foreground">KSh 2B+ Disbursed</span>
             </div>
           </div>
@@ -220,32 +220,32 @@ const Landing = () => {
           {/* Features Grid */}
           <div className="w-full grid grid-cols-2 gap-3 mt-6">
             <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-border/50">
-              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center mb-3">
-                <Zap className="w-6 h-6 text-amber-500" />
+              <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mb-3">
+                <Zap className="w-6 h-6 text-secondary" />
               </div>
               <h3 className="font-semibold text-sm text-foreground mb-1">2-Min Approval</h3>
               <p className="text-muted-foreground text-xs">Get approved in minutes</p>
             </div>
 
             <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-border/50">
-              <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center mb-3">
-                <Shield className="w-6 h-6 text-teal-500" />
+              <div className="w-12 h-12 bg-primary/10 dark:bg-primary/30 rounded-xl flex items-center justify-center mb-3">
+                <Shield className="w-6 h-6 text-primary/50" />
               </div>
               <h3 className="font-semibold text-sm text-foreground mb-1">Bank-Level Security</h3>
               <p className="text-muted-foreground text-xs">Your data is protected</p>
             </div>
 
             <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-border/50">
-              <div className="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 rounded-xl flex items-center justify-center mb-3">
-                <Sparkles className="w-6 h-6 text-rose-500" />
+              <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mb-3">
+                <Sparkles className="w-6 h-6 text-secondary" />
               </div>
               <h3 className="font-semibold text-sm text-foreground mb-1">No Paperwork</h3>
               <p className="text-muted-foreground text-xs">100% digital process</p>
             </div>
 
             <div className="bg-card/80 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-border/50">
-              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center mb-3">
-                <Clock className="w-6 h-6 text-emerald-500" />
+              <div className="w-12 h-12 bg-primary/10 dark:bg-primary/30 rounded-xl flex items-center justify-center mb-3">
+                <Clock className="w-6 h-6 text-primary/50" />
               </div>
               <h3 className="font-semibold text-sm text-foreground mb-1">24/7 Available</h3>
               <p className="text-muted-foreground text-xs">Apply anytime</p>
